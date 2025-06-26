@@ -1,0 +1,105 @@
+hazelcast:
+  cluster-name: hz-demo
+
+  jet:
+    enabled: true
+
+  executor-service:
+    "hz:map-store-offloadable":
+      pool-size: 16
+      queue-capacity: 0
+    order-calculation:
+      pool-size: 3
+      queue-capacity: 1000
+      statistics-enabled: true
+    price-processing:
+      pool-size: 3
+      queue-capacity: 1000
+      statistics-enabled: true
+
+  network:
+    port:
+      auto-increment: true
+      port: 5701
+    join:
+      multicast:
+        enabled: true
+      auto-detection:
+        enabled: true
+
+  data-connection:
+    h2-testdb:
+      type: JDBC
+      properties:
+        jdbcUrl: "jdbc:h2:tcp://localhost:9092/mem:testdb;MODE=MSSQLServer;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;"
+        user: "sa"
+        password: ""
+      shared: true
+
+  map:
+    customer:
+      backup-count: 1
+      async-backup-count: 2
+      time-to-live-seconds: 0
+      event-journal:
+        enabled: true
+        capacity: 10000
+        time-to-live-seconds: 180
+      entry-listeners:
+        - class-name: org.example.listener.CustomerListener
+          include-value: true
+          local: true
+      map-store:
+        enabled: true
+        class-name: com.hazelcast.mapstore.GenericMapLoader
+        properties:
+          data-connection-ref: h2-testdb
+          mapping-type: JDBC
+          type-name: org.example.model.Customer
+          external-name: dbo.customer
+          id-column: id
+          columns: id,name,email,age
+
+    product:
+      backup-count: 1
+      time-to-live-seconds: 0
+      map-store:
+        enabled: true
+        class-name: com.hazelcast.mapstore.GenericMapLoader
+        properties:
+          data-connection-ref: h2-testdb
+          mapping-type: JDBC
+          type-name: org.example.model.Product
+          external-name: dbo.product
+          id-column: id
+          columns: id,name,description,price,last_modified
+
+    customer-order:
+      backup-count: 1
+      time-to-live-seconds: 0
+      map-store:
+        enabled: true
+        write-delay-seconds: 1
+        class-name: com.hazelcast.mapstore.GenericMapStore
+        properties:
+          data-connection-ref: h2-testdb
+          mapping-type: JDBC
+          external-name: dbo.customer_orders
+          id-column: id
+          columns: id,customer_id,product_id,quantity,order_date
+
+    invoice:
+      backup-count: 1
+      time-to-live-seconds: 0
+      entry-listeners:
+        - class-name: org.example.listener.InvoiceListener
+          include-value: true
+          local: true
+
+    price:
+      backup-count: 0
+      time-to-live-seconds: 5
+      entry-listeners:
+        - class-name: org.example.listener.PriceListener
+          include-value: true
+          local: true

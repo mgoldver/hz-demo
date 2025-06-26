@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: hz-demo
+  hazelcast:
+    config: classpath:hazelcast.yaml
+  datasource:
+    url: jdbc:h2:tcp://localhost:9092/mem:testdb;MODE=MSSQLServer;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      base-path: /actuator
+  endpoint:
+    hazelcast:
+      enabled: true
+      cache:
+        time-to-live: 2s
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.example: INFO
+    com.hazelcast: INFO
