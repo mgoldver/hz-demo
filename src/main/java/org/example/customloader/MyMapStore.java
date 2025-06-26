@@ -3,7 +3,6 @@ package org.example.customloader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -33,7 +32,7 @@ public class MyMapStore implements MapStore<Integer, Product>
     public Product load(Integer key)
     {
         try (Connection connection = this.dataSource.getConnection();
-             PreparedStatement sql = connection.prepareStatement("sql");)
+             PreparedStatement sql = connection.prepareStatement("sql"))
         {
             sql.setInt(1, key);
             ResultSet resultSet = sql.executeQuery();
